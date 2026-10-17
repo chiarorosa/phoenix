@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f7ec0bf39e2b20395482edc904d03abf>>
+ * @generated SignedSource<<bb49d490609389a2d23f89b906486cd3>>
  * @lightSyntaxTransform
  */
 
@@ -16,7 +16,7 @@ export type ExperimentComparePageQueriesCompareGridQuery$variables = {
   experimentIds: ReadonlyArray<string>;
 };
 export type ExperimentComparePageQueriesCompareGridQuery$data = {
-  readonly " $fragmentSpreads": FragmentRefs<"ExperimentCompareTable_comparisons">;
+  readonly " $fragmentSpreads": FragmentRefs<"ExperimentCompareTable_comparisons" | "ExperimentCompareTable_experiments">;
 };
 export type ExperimentComparePageQueriesCompareGridQuery = {
   response: ExperimentComparePageQueriesCompareGridQuery$data;
@@ -224,7 +224,13 @@ return {
       {
         "args": [
           (v4/*:: as any*/),
-          (v5/*:: as any*/),
+          (v5/*:: as any*/)
+        ],
+        "kind": "FragmentSpread",
+        "name": "ExperimentCompareTable_comparisons"
+      },
+      {
+        "args": [
           {
             "kind": "Variable",
             "name": "datasetId",
@@ -237,7 +243,7 @@ return {
           }
         ],
         "kind": "FragmentSpread",
-        "name": "ExperimentCompareTable_comparisons"
+        "name": "ExperimentCompareTable_experiments"
       }
     ],
     "type": "Query",
@@ -804,16 +810,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "8df5390dc123c95d67f6d65cf57f0a24",
+    "cacheID": "9ea250e95a913d996a35742dc135566c",
     "id": null,
     "metadata": {},
     "name": "ExperimentComparePageQueriesCompareGridQuery",
     "operationKind": "query",
-    "text": "query ExperimentComparePageQueriesCompareGridQuery(\n  $datasetId: ID!\n  $experimentIds: [ID!]!\n  $baseExperimentId: ID!\n  $compareExperimentIds: [ID!]!\n) {\n  ...ExperimentCompareTable_comparisons_4mFQqw\n}\n\nfragment ExperimentCompareTable_comparisons_4mFQqw on Query {\n  compareExperiments(first: 50, baseExperimentId: $baseExperimentId, compareExperimentIds: $compareExperimentIds) {\n    edges {\n      comparison: node {\n        example {\n          id\n          externalId\n          revision {\n            input\n            referenceOutput: output\n          }\n        }\n        repeatedRunGroups {\n          ...ExperimentRepeatedRunGroupMetadataFragment\n          annotationSummaries {\n            annotationName\n            meanScore\n          }\n          experimentId\n          runs {\n            id\n            latencyMs\n            repetitionNumber\n            output\n            error\n            trace {\n              traceId\n              projectId\n              id\n            }\n            costSummary {\n              total {\n                tokens\n                cost\n              }\n            }\n            annotations {\n              edges {\n                annotation: node {\n                  id\n                  name\n                  score\n                  label\n                  annotatorKind\n                  explanation\n                  metadata\n                  trace {\n                    traceId\n                    projectId\n                    id\n                  }\n                }\n              }\n            }\n          }\n          id\n        }\n        id\n      }\n      cursor\n      node {\n        __typename\n        id\n      }\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  dataset: node(id: $datasetId) {\n    __typename\n    id\n    ... on Dataset {\n      experiments(filterIds: $experimentIds, includeEphemeral: true) {\n        edges {\n          experiment: node {\n            id\n            name\n            sequenceNumber\n            isBaseline\n            isEphemeral\n            metadata\n            datasetVersion {\n              id\n            }\n            project {\n              id\n            }\n            costSummary {\n              total {\n                cost\n                tokens\n              }\n            }\n            averageRunLatencyMs\n            runCount\n            repetitions\n            annotationSummaries {\n              annotationName\n              meanScore\n            }\n          }\n        }\n      }\n      datasetEvaluators(first: 100) {\n        edges {\n          node {\n            name\n            outputConfigs {\n              __typename\n              ... on CategoricalAnnotationConfig {\n                name\n                optimizationDirection\n                values {\n                  label\n                  score\n                }\n              }\n              ... on ContinuousAnnotationConfig {\n                name\n                optimizationDirection\n                lowerBound\n                upperBound\n              }\n              ... on FreeformAnnotationConfig {\n                name\n                optimizationDirection\n                threshold\n                lowerBound\n                upperBound\n              }\n              ... on Node {\n                __isNode: __typename\n                id\n              }\n            }\n            id\n          }\n        }\n      }\n    }\n  }\n}\n\nfragment ExperimentRepeatedRunGroupMetadataFragment on ExperimentRepeatedRunGroup {\n  id\n  averageLatencyMs\n  costSummary {\n    total {\n      tokens\n      cost\n    }\n  }\n}\n"
+    "text": "query ExperimentComparePageQueriesCompareGridQuery(\n  $datasetId: ID!\n  $experimentIds: [ID!]!\n  $baseExperimentId: ID!\n  $compareExperimentIds: [ID!]!\n) {\n  ...ExperimentCompareTable_comparisons_2bWqNi\n  ...ExperimentCompareTable_experiments_3xL6z4\n}\n\nfragment ExperimentCompareTable_comparisons_2bWqNi on Query {\n  compareExperiments(first: 50, baseExperimentId: $baseExperimentId, compareExperimentIds: $compareExperimentIds) {\n    edges {\n      comparison: node {\n        example {\n          id\n          externalId\n          revision {\n            input\n            referenceOutput: output\n          }\n        }\n        repeatedRunGroups {\n          ...ExperimentRepeatedRunGroupMetadataFragment\n          annotationSummaries {\n            annotationName\n            meanScore\n          }\n          experimentId\n          runs {\n            id\n            latencyMs\n            repetitionNumber\n            output\n            error\n            trace {\n              traceId\n              projectId\n              id\n            }\n            costSummary {\n              total {\n                tokens\n                cost\n              }\n            }\n            annotations {\n              edges {\n                annotation: node {\n                  id\n                  name\n                  score\n                  label\n                  annotatorKind\n                  explanation\n                  metadata\n                  trace {\n                    traceId\n                    projectId\n                    id\n                  }\n                }\n              }\n            }\n          }\n          id\n        }\n        id\n      }\n      cursor\n      node {\n        __typename\n        id\n      }\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment ExperimentCompareTable_experiments_3xL6z4 on Query {\n  dataset: node(id: $datasetId) {\n    __typename\n    id\n    ... on Dataset {\n      experiments(filterIds: $experimentIds, includeEphemeral: true) {\n        edges {\n          experiment: node {\n            id\n            name\n            sequenceNumber\n            isBaseline\n            isEphemeral\n            metadata\n            datasetVersion {\n              id\n            }\n            project {\n              id\n            }\n            costSummary {\n              total {\n                cost\n                tokens\n              }\n            }\n            averageRunLatencyMs\n            runCount\n            repetitions\n            annotationSummaries {\n              annotationName\n              meanScore\n            }\n          }\n        }\n      }\n      datasetEvaluators(first: 100) {\n        edges {\n          node {\n            name\n            outputConfigs {\n              __typename\n              ... on CategoricalAnnotationConfig {\n                name\n                optimizationDirection\n                values {\n                  label\n                  score\n                }\n              }\n              ... on ContinuousAnnotationConfig {\n                name\n                optimizationDirection\n                lowerBound\n                upperBound\n              }\n              ... on FreeformAnnotationConfig {\n                name\n                optimizationDirection\n                threshold\n                lowerBound\n                upperBound\n              }\n              ... on Node {\n                __isNode: __typename\n                id\n              }\n            }\n            id\n          }\n        }\n      }\n    }\n  }\n}\n\nfragment ExperimentRepeatedRunGroupMetadataFragment on ExperimentRepeatedRunGroup {\n  id\n  averageLatencyMs\n  costSummary {\n    total {\n      tokens\n      cost\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "a328b01cd5bf68e34f987eb2eaa5bea4";
+(node as any).hash = "26139e9eb23127e4d796725c781c065d";
 
 export default node;

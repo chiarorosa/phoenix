@@ -34,11 +34,11 @@ export const ExperimentComparePageQueriesCompareGridQuery = graphql`
   ) {
     ...ExperimentCompareTable_comparisons
       @arguments(
-        datasetId: $datasetId
-        experimentIds: $experimentIds
         baseExperimentId: $baseExperimentId
         compareExperimentIds: $compareExperimentIds
       )
+    ...ExperimentCompareTable_experiments
+      @arguments(datasetId: $datasetId, experimentIds: $experimentIds)
   }
 `;
 

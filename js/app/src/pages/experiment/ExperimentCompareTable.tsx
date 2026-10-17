@@ -12,7 +12,12 @@ import React, {
   useState,
 } from "react";
 import type { PreloadedQuery } from "react-relay";
-import { graphql, usePaginationFragment, usePreloadedQuery } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  usePaginationFragment,
+  usePreloadedQuery,
+} from "react-relay";
 import { useSearchParams } from "react-router";
 
 import {
@@ -66,10 +71,15 @@ import { TraceDetailsDrawer } from "@phoenix/pages/experiment/TraceDetailsDrawer
 import { datasetEvaluatorsToAnnotationConfigs } from "@phoenix/utils/datasetEvaluatorUtils";
 import { makeSafeColumnId } from "@phoenix/utils/tableUtils";
 
+import type { ExperimentComparePageQueriesCompareGridQuery as ExperimentComparePageQueriesCompareGridQueryType } from "./__generated__/ExperimentComparePageQueriesCompareGridQuery.graphql";
 import type {
   ExperimentCompareTable_comparisons$data,
   ExperimentCompareTable_comparisons$key,
 } from "./__generated__/ExperimentCompareTable_comparisons.graphql";
+import type {
+  ExperimentCompareTable_experiments$data,
+  ExperimentCompareTable_experiments$key,
+} from "./__generated__/ExperimentCompareTable_experiments.graphql";
 import type { ExperimentCompareTableQuery as ExperimentCompareTableQueryType } from "./__generated__/ExperimentCompareTableQuery.graphql";
 import { useExperimentCompareDeltasViewSetting } from "./experimentCompareDeltasViewSetting";
 import {
@@ -81,7 +91,7 @@ import { ExperimentRepetitionSelector } from "./ExperimentRepetitionSelector";
 import { ExperimentRunFilterConditionField } from "./ExperimentRunFilterConditionField";
 
 type ExampleCompareTableProps = {
-  queryRef: PreloadedQuery<ExperimentCompareTableQueryType>;
+  queryRef: PreloadedQuery<ExperimentComparePageQueriesCompareGridQueryType>;
   datasetId: string;
   /**
    * The compared experiments, base experiment first
@@ -90,7 +100,7 @@ type ExampleCompareTableProps = {
 };
 
 type Experiment = NonNullable<
-  ExperimentCompareTable_comparisons$data["dataset"]["experiments"]
+  ExperimentCompareTable_experiments$data["dataset"]["experiments"]
 >["edges"][number]["experiment"];
 
 type ExperimentInfoMap = Partial<Record<string, Experiment>>;
@@ -173,10 +183,11 @@ export function ExperimentCompareTable(props: ExampleCompareTableProps) {
   );
   const { baseExperimentColor, getExperimentColor } = useExperimentColors();
 
-  const preloadedData = usePreloadedQuery<ExperimentCompareTableQueryType>(
-    ExperimentComparePageQueriesCompareGridQuery,
-    props.queryRef
-  );
+  const preloadedData =
+    usePreloadedQuery<ExperimentComparePageQueriesCompareGridQueryType>(
+      ExperimentComparePageQueriesCompareGridQuery,
+      props.queryRef
+    );
 
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -191,8 +202,6 @@ export function ExperimentCompareTable(props: ExampleCompareTableProps) {
           after: { type: "String", defaultValue: null }
           baseExperimentId: { type: "ID!" }
           compareExperimentIds: { type: "[ID!]!" }
-          experimentIds: { type: "[ID!]!" }
-          datasetId: { type: "ID!" }
           filterCondition: { type: "String", defaultValue: null }
         ) {
           compareExperiments(
@@ -257,67 +266,79 @@ export function ExperimentCompareTable(props: ExampleCompareTableProps) {
               }
             }
           }
-          dataset: node(id: $datasetId) {
-            id
-            ... on Dataset {
-              experiments(filterIds: $experimentIds, includeEphemeral: true) {
-                edges {
-                  experiment: node {
+        }
+      `,
+      preloadedData
+    );
+  // Kept out of the paginated fragment above so that loadNext and the filter
+  // refetch only fetch comparisons, not the experiments' aggregate metrics.
+  const experimentsData = useFragment<ExperimentCompareTable_experiments$key>(
+    graphql`
+      fragment ExperimentCompareTable_experiments on Query
+      @argumentDefinitions(
+        datasetId: { type: "ID!" }
+        experimentIds: { type: "[ID!]!" }
+      ) {
+        dataset: node(id: $datasetId) {
+          id
+          ... on Dataset {
+            experiments(filterIds: $experimentIds, includeEphemeral: true) {
+              edges {
+                experiment: node {
+                  id
+                  name
+                  sequenceNumber
+                  isBaseline
+                  isEphemeral
+                  metadata
+                  datasetVersion {
                     id
-                    name
-                    sequenceNumber
-                    isBaseline
-                    isEphemeral
-                    metadata
-                    datasetVersion {
-                      id
+                  }
+                  project {
+                    id
+                  }
+                  costSummary {
+                    total {
+                      cost
+                      tokens
                     }
-                    project {
-                      id
-                    }
-                    costSummary {
-                      total {
-                        cost
-                        tokens
-                      }
-                    }
-                    averageRunLatencyMs
-                    runCount
-                    repetitions
-                    annotationSummaries {
-                      annotationName
-                      meanScore
-                    }
+                  }
+                  averageRunLatencyMs
+                  runCount
+                  repetitions
+                  annotationSummaries {
+                    annotationName
+                    meanScore
                   }
                 }
               }
-              datasetEvaluators(first: 100) {
-                edges {
-                  node {
-                    name
-                    outputConfigs {
-                      __typename
-                      ... on CategoricalAnnotationConfig {
-                        name
-                        optimizationDirection
-                        values {
-                          label
-                          score
-                        }
+            }
+            datasetEvaluators(first: 100) {
+              edges {
+                node {
+                  name
+                  outputConfigs {
+                    __typename
+                    ... on CategoricalAnnotationConfig {
+                      name
+                      optimizationDirection
+                      values {
+                        label
+                        score
                       }
-                      ... on ContinuousAnnotationConfig {
-                        name
-                        optimizationDirection
-                        lowerBound
-                        upperBound
-                      }
-                      ... on FreeformAnnotationConfig {
-                        name
-                        optimizationDirection
-                        threshold
-                        lowerBound
-                        upperBound
-                      }
+                    }
+                    ... on ContinuousAnnotationConfig {
+                      name
+                      optimizationDirection
+                      lowerBound
+                      upperBound
+                    }
+                    ... on FreeformAnnotationConfig {
+                      name
+                      optimizationDirection
+                      threshold
+                      lowerBound
+                      upperBound
                     }
                   }
                 }
@@ -325,25 +346,28 @@ export function ExperimentCompareTable(props: ExampleCompareTableProps) {
             }
           }
         }
-      `,
-      preloadedData
-    );
+      }
+    `,
+    preloadedData
+  );
   const experimentInfoById = useMemo(() => {
     return (
-      data.dataset?.experiments?.edges.reduce((acc, edge) => {
+      experimentsData.dataset?.experiments?.edges.reduce((acc, edge) => {
         acc[edge.experiment.id] = {
           ...edge.experiment,
         };
         return acc;
       }, {} as ExperimentInfoMap) || {}
     );
-  }, [data]);
+  }, [experimentsData]);
 
   const annotationConfigs = useMemo(() => {
     const evaluators =
-      data.dataset?.datasetEvaluators?.edges.map((edge) => edge.node) ?? [];
+      experimentsData.dataset?.datasetEvaluators?.edges.map(
+        (edge) => edge.node
+      ) ?? [];
     return datasetEvaluatorsToAnnotationConfigs(evaluators);
-  }, [data]);
+  }, [experimentsData]);
 
   const baseExperiment = experimentInfoById[baseExperimentId];
 
@@ -620,7 +644,6 @@ export function ExperimentCompareTable(props: ExampleCompareTableProps) {
           filterCondition,
           baseExperimentId,
           compareExperimentIds,
-          datasetId,
         },
         { fetchPolicy: "store-and-network" }
       );
